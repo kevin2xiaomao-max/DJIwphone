@@ -1,0 +1,40 @@
+# macOS
+.DS_Store
+xcuserdata/
+*.xcscmblueprint
+DerivedData/
+build/
+*.ipa
+*.dSYM.zip
+*.dSYM
+*.mobileprovision
+*.provisionprofile
+*.p12
+*.cer
+*.pem
+*.key
+*.crt
+*.ipa
+*.app
+
+# 本地 Gateway/凭据/环境文件
+*.xcuserstate
+*.xcuserdatad/
+.env
+.env.*
+Secrets.xcconfig
+Config.local.xcconfig
+gateway-token*
+api-token*
+credentials*
+
+# XcodeGen 生成产物（如使用 project.yml 重新生成）
+# 注意：仓库自带手写 XiaoZhangGui.xcodeproj，勿整体忽略
+
+# SwiftPM
+.build/
+Package.resolved
+
+# 编辑器
+.vscode/
+.idea/

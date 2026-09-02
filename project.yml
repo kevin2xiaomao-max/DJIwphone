@@ -1,0 +1,48 @@
+name: DJIwphone
+options:
+  bundleIdPrefix: com.kevin2xiaomao
+  deploymentTarget:
+    iOS: "17.0"
+  developmentLanguage: zh-Hans
+  createIntermediateGroups: true
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    TARGETED_DEVICE_FAMILY: 1
+    IPHONEOS_DEPLOYMENT_TARGET: "17.0"
+    DEVELOPMENT_TEAM: ""
+    CODE_SIGN_STYLE: Automatic
+targets:
+  QDC507Communication:
+    type: application
+    platform: iOS
+    sources:
+      - path: DJIwphone
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.kevin2xiaomao.qdc507communication
+        MARKETING_VERSION: "0.2.0"
+        CURRENT_PROJECT_VERSION: "1"
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_CFBundleDisplayName: DJIwphone
+        INFOPLIST_KEY_NSMicrophoneUsageDescription: QDC507 通话音频需要使用麦克风
+        INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        INFOPLIST_KEY_UIUserInterfaceStyle: Automatic
+  QDC507CommunicationTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: Tests
+        excludes:
+          - "**/*.ps1"
+          - "**/*.json"
+          - "**/*.md"
+    dependencies:
+      - target: QDC507Communication
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.kevin2xiaomao.qdc507communication.tests
+        GENERATE_INFOPLIST_FILE: YES
+        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/QDC507Communication.app/QDC507Communication"
+        BUNDLE_LOADER: "$(TEST_HOST)"
