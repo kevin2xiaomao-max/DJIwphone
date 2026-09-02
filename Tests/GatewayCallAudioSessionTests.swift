@@ -1,5 +1,5 @@
 import XCTest
-@testable import XiaoZhangGui
+@testable import QDC507Communication
 
 @MainActor
 final class GatewayCallAudioSessionTests: XCTestCase {

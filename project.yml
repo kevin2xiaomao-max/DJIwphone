@@ -38,6 +38,7 @@ targets:
           - "**/*.ps1"
           - "**/*.json"
           - "**/*.md"
+          - GatewayConfigurationTests.swift
     dependencies:
       - target: QDC507Communication
     settings:
