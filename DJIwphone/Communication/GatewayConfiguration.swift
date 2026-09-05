@@ -59,6 +59,10 @@ struct GatewayConfiguration {
         return request
     }
 
+    func realtimeRequest() throws -> URLRequest {
+        try request(path: "ws", webSocket: true)
+    }
+
     func callRequest(action: GatewayCallAction, callID: String?, number: String?, requestID: UUID) throws -> URLRequest {
         let path: String
         var body: [String: Any] = [:]
