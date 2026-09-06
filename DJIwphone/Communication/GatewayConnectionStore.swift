@@ -8,6 +8,8 @@ final class GatewayConnectionStore {
     private(set) var messages: [GatewaySMSMessage] = []
     private(set) var calls: [GatewayCall] = []
     let audioSession = GatewayCallAudioSession()
+    private let callCoordinator: CallCoordinator
+    private let callKit: DefaultDJIwphoneCallKit
     private(set) var isConnected = false
     private(set) var lastError: String?
     private(set) var messagesError: String?
@@ -20,6 +22,18 @@ final class GatewayConnectionStore {
     private(set) var callActionMessage: String?
     private var pendingAction: (action: GatewayCallAction, id: String?)?
     private var attemptedActions: Set<String> = []
+
+    init() {
+        let callKit = DefaultDJIwphoneCallKit()
+        self.callKit = callKit
+        self.callCoordinator = CallCoordinator(callKit: callKit)
+        callKit.onAction = { [weak self] callID, action in
+            guard let self else { return false }
+            guard let call = self.calls.first(where: { $0.id == callID }) else { return false }
+            await self.performCallAction(action, call: call)
+            return true
+        }
+    }
 
     var callControlsBusy: Bool { callActionInFlight || pendingAction != nil }
 
@@ -180,6 +194,10 @@ final class GatewayConnectionStore {
     }
 
     private func apply(_ event: GatewayEvent) {
+        if let data = event.data, let callID = data.callId, let state = data.state {
+            callCoordinator.apply(GatewayCallEvent(type: event.type, callID: callID,
+                                                   state: state, number: data.maskedNumber))
+        }
         switch event.type {
         case "sms.received":
             if isRefreshing { messagesRefreshRequested = true }

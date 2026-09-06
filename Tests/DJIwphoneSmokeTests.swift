@@ -1,7 +1,9 @@
 import XCTest
+@testable import DJIwphone
 
 final class DJIwphoneSmokeTests: XCTestCase {
-    func testCommunicationTestBundleLoads() {
-        XCTAssertTrue(true, "DJIwphone 独立测试目标已加载")
+    func testOriginalApplicationIdentity() {
+        XCTAssertEqual(DJIwphoneIdentity.bundleIdentifier, "com.kevin2xiaomao.qdc507communication")
+        XCTAssertEqual(DJIwphoneIdentity.displayName, "DJIwphone")
     }
 }

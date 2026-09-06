@@ -1,5 +1,10 @@
 import SwiftUI
 
+enum DJIwphoneIdentity {
+    static let bundleIdentifier = "com.kevin2xiaomao.qdc507communication"
+    static let displayName = "DJIwphone"
+}
+
 @main
 struct DJIwphoneApp: App {
     @State private var settings = AppSettings.shared

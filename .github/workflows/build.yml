@@ -1,35 +1,39 @@
-name: DJIwphone 独立构建
+name: DJIwphone device build
 on:
   workflow_dispatch:
 permissions:
   contents: read
 jobs:
   build:
-    name: DJIwphone Xcode 构建、测试与 IPA
+    name: DJIwphone build, test and IPA
     runs-on: macos-15
     steps:
       - name: 检出源码
         uses: actions/checkout@v4
-      - name: 安装并生成 Xcode 工程
+      - name: Install XcodeGen and generate project
         run: brew install xcodegen && xcodegen generate
-      - name: 显示工程信息
-        run: xcodebuild -list -project DJIwphone.xcodeproj
-      - name: 模拟器构建与 XCTest
-        run: xcodebuild test -project DJIwphone.xcodeproj -scheme QDC507Communication -destination 'platform=iOS Simulator,name=iPhone 16' -derivedDataPath build/Simulator CODE_SIGNING_ALLOWED=NO
-      - name: 真机 unsigned 构建并封装 IPA
+      - name: Install CocoaPods and resolve WebRTC
+        run: gem install cocoapods --no-document && pod install --repo-update
+      - name: Simulator XCTest
+        run: xcodebuild test -workspace DJIwphone.xcworkspace -scheme DJIwphone -destination 'platform=iOS Simulator,name=iPhone 16' -derivedDataPath build/Simulator CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO
+      - name: Device Release build and package
         shell: bash
         run: |
           set -euo pipefail
-          xcodebuild build -project DJIwphone.xcodeproj -scheme QDC507Communication -sdk iphoneos -configuration Release -derivedDataPath build/Device CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO
-          app=$(find build/Device/Build/Products -type d -path '*Release-iphoneos/*.app' -maxdepth 6 | head -n 1)
-          test -n "$app" && test -d "$app"
+          xcodebuild build -workspace DJIwphone.xcworkspace -scheme DJIwphone -sdk iphoneos -configuration Release -derivedDataPath build/Device CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO
+          apps=()
+          while IFS= read -r app_path; do apps+=("$app_path"); done < <(find build/Device/Build/Products -type d -path '*Release-iphoneos/*.app' -maxdepth 6 -print)
+          test "${#apps[@]}" -eq 1
+          test "$(basename "${apps[0]}")" = DJIwphone.app
           rm -rf ipa && mkdir -p ipa/Payload
-          cp -R "$app" ipa/Payload/
-          (cd ipa && zip -qry ../DJIwphone-v0.2.0-unsigned.ipa Payload)
-          unzip -t DJIwphone-v0.2.0-unsigned.ipa
-          unzip -l DJIwphone-v0.2.0-unsigned.ipa | grep -E 'Payload/[^/]+\.app/'
-      - name: 上传 DJIwphone unsigned IPA
+          cp -R "${apps[0]}" ipa/Payload/DJIwphone.app
+          (cd ipa && zip -qry ../DJIwphone.ipa Payload)
+          bash scripts/validate_ipa.sh DJIwphone.ipa ipa-validation.txt
+      - name: Upload one validated DJIwphone artifact
         uses: actions/upload-artifact@v4
         with:
-          name: DJIwphone-v0.2.0-unsigned
-          path: DJIwphone-v0.2.0-unsigned.ipa
+          name: DJIwphone-ipa
+          path: |
+            DJIwphone.ipa
+            ipa-validation.txt
+          if-no-files-found: error
