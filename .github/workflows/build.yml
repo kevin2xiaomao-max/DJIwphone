@@ -14,8 +14,19 @@ jobs:
         run: brew install xcodegen && xcodegen generate
       - name: Install CocoaPods and resolve WebRTC
         run: gem install cocoapods --no-document && pod install --repo-update
+      - name: Discover available iOS Simulator
+        shell: bash
+        run: |
+          set -euo pipefail
+          xcrun simctl list devices available
+          xcodebuild -workspace DJIwphone.xcworkspace -scheme DJIwphone -showdestinations
+          udid=$(xcrun simctl list devices available | awk -F '[()]' '/iPhone/ && /Booted|Shutdown/ {print $2; exit}')
+          test -n "$udid"
+          echo "SIMULATOR_UDID=$udid" >> "$GITHUB_ENV"
       - name: Simulator XCTest
-        run: xcodebuild test -workspace DJIwphone.xcworkspace -scheme DJIwphone -destination 'platform=iOS Simulator,OS=latest,name=iPhone 17 Pro' -derivedDataPath build/Simulator CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO
+        run: xcodebuild test -workspace DJIwphone.xcworkspace -scheme DJIwphone -destination "id=$SIMULATOR_UDID" -derivedDataPath build/Simulator CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO
+      - name: Simulator build
+        run: xcodebuild build -workspace DJIwphone.xcworkspace -scheme DJIwphone -destination "id=$SIMULATOR_UDID" -derivedDataPath build/SimulatorBuild CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO
       - name: Device Release build and package
         shell: bash
         run: |
