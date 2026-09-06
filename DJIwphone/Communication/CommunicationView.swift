@@ -43,6 +43,7 @@ struct CommunicationView: View {
         .background(Color(uiColor: .systemGroupedBackground).ignoresSafeArea())
         .navigationTitle("QDC507").navigationBarTitleDisplayMode(.large)
         .refreshable { await store.refreshReadOnlyState() }
+        .task { store.restart(settings: settings) }
     }
 
     private var deviceHeader: some View {

@@ -83,6 +83,7 @@ struct GatewaySettingsView: View {
     private func save() {
         do {
             try settings.save(address: address, token: token)
+            store.restart(settings: settings)
             address = settings.savedAddress
             token = ""
             feedback = "配置已保存。返回通信页后会使用该配置连接。"

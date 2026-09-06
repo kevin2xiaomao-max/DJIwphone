@@ -4,6 +4,8 @@ import Observation
 @MainActor
 @Observable
 final class GatewayConnectionStore {
+    enum ConnectionPhase: Equatable { case offline, connecting, online }
+    private(set) var connectionPhase: ConnectionPhase = .offline
     private(set) var status: GatewayDeviceStatus?
     private(set) var messages: [GatewaySMSMessage] = []
     private(set) var calls: [GatewayCall] = []
@@ -22,6 +24,7 @@ final class GatewayConnectionStore {
     private(set) var callActionMessage: String?
     private var pendingAction: (action: GatewayCallAction, id: String?)?
     private var attemptedActions: Set<String> = []
+    private var refreshTask: Task<Void, Never>?
 
     init() {
         let callKit = DefaultDJIwphoneCallKit()
@@ -105,7 +108,9 @@ final class GatewayConnectionStore {
     var currentCall: GatewayCall? { calls.first(where: { $0.isOngoing }) }
 
     func startReadOnlyRefresh(settings: GatewaySettingsStore) async {
+        refreshTask = nil
         stop()
+        connectionPhase = .connecting
         let current = generation
         do {
             let connection = try URLSessionGatewayClient(settings: settings)
@@ -117,9 +122,11 @@ final class GatewayConnectionStore {
             connection.onDisconnect = { [weak self] in
                 guard let self, self.generation == current else { return }
                 self.isConnected = false
+                self.connectionPhase = .offline
                 self.lastError = "实时连接已中断，正在等待重连。"
             }
         } catch {
+            connectionPhase = .offline
             lastError = GatewayClientError.safeMessage(for: error)
             return
         }
@@ -131,6 +138,14 @@ final class GatewayConnectionStore {
         }
     }
 
+    func restart(settings: GatewaySettingsStore) {
+        refreshTask?.cancel()
+        refreshTask = Task { @MainActor [weak self] in
+            guard let self else { return }
+            await self.startReadOnlyRefresh(settings: settings)
+        }
+    }
+
     func stop() {
         generation = UUID()
         client?.onEvent = nil
@@ -138,6 +153,7 @@ final class GatewayConnectionStore {
         client?.disconnect()
         client = nil
         isConnected = false
+        connectionPhase = .offline
         isRefreshing = false
         status = nil
         calls = []
@@ -171,6 +187,7 @@ final class GatewayConnectionStore {
             try await client.connectEvents()
             guard generation == current else { return }
             isConnected = true
+            connectionPhase = .online
             lastError = nil
             let beforeCalls = eventRevision
             let newCalls = try await client.fetchCalls()
@@ -188,6 +205,7 @@ final class GatewayConnectionStore {
         } catch {
             guard generation == current, !Task.isCancelled else { return }
             isConnected = false
+            connectionPhase = .offline
             lastError = GatewayClientError.safeMessage(for: error)
             client.disconnect()
         }
