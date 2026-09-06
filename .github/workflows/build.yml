@@ -21,7 +21,8 @@ jobs:
         run: |
           set -euo pipefail
           xcodebuild build -workspace DJIwphone.xcworkspace -scheme DJIwphone -sdk iphoneos -configuration Release -derivedDataPath build/Device CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO
-          mapfile -t apps < <(find build/Device/Build/Products -type d -path '*Release-iphoneos/*.app' -maxdepth 6 -print)
+          apps=()
+          while IFS= read -r app_path; do apps+=("$app_path"); done < <(find build/Device/Build/Products -type d -path '*Release-iphoneos/*.app' -maxdepth 6 -print)
           test "${#apps[@]}" -eq 1
           test "$(basename "${apps[0]}")" = DJIwphone.app
           rm -rf ipa && mkdir -p ipa/Payload

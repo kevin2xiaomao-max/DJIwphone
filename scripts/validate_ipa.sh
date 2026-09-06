@@ -14,7 +14,8 @@ ipa_bytes=$(stat -f %z "$ipa")
 (( ipa_bytes >= min_ipa_bytes )) || { echo "IPA too small: $ipa_bytes bytes" >&2; exit 1; }
 unzip -q -t "$ipa" >/dev/null
 unzip -q "$ipa" -d "$tmp/unpacked"
-mapfile -t apps < <(find "$tmp/unpacked/Payload" -mindepth 1 -maxdepth 1 -type d -name '*.app' -print)
+apps=()
+while IFS= read -r app_path; do apps+=("$app_path"); done < <(find "$tmp/unpacked/Payload" -mindepth 1 -maxdepth 1 -type d -name '*.app' -print)
 (( ${#apps[@]} == 1 )) || { echo "expected exactly one Payload app, found ${#apps[@]}" >&2; exit 1; }
 app=${apps[0]}
 [[ "$(basename "$app")" == "DJIwphone.app" ]] || { echo "wrong app name: $(basename "$app")" >&2; exit 1; }
