@@ -21,6 +21,7 @@ app=${apps[0]}
 [[ "$(basename "$app")" == "DJIwphone.app" ]] || { echo "wrong app name: $(basename "$app")" >&2; exit 1; }
 plist="$app/Info.plist"
 [[ -f "$plist" ]] || { echo "Info.plist missing" >&2; exit 1; }
+[[ -f "$app/Assets.car" ]] || { echo "Assets.car missing (AppIcon not compiled)" >&2; exit 1; }
 bundle=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$plist")
 [[ "$bundle" == "$expected_bundle" ]] || { echo "wrong Bundle ID: $bundle" >&2; exit 1; }
 executable=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' "$plist")
