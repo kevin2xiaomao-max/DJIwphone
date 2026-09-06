@@ -4,6 +4,7 @@ import SwiftUI
 struct CommunicationMessagesView: View {
     @Environment(AppSettings.self) private var appSettings
     @Environment(GatewayConnectionStore.self) private var store
+    @State private var compose = false
 
     var body: some View {
         ScrollView {
@@ -42,7 +43,29 @@ struct CommunicationMessagesView: View {
         .background(V21.background)
         .foregroundStyle(V21.textPrimary)
         .navigationTitle("短信")
+        .toolbar { ToolbarItem(placement: .primaryAction) { Button { compose = true } label: { Image(systemName: "square.and.pencil") }.disabled(!store.isConnected) } }
+        .sheet(isPresented: $compose) { SMSComposeView() }
         .navigationBarTitleDisplayMode(.inline)
         .refreshable { await store.refreshReadOnlyState() }
+    }
+}
+
+@MainActor
+private struct SMSComposeView: View {
+    @Environment(GatewayConnectionStore.self) private var store
+    @Environment(\.dismiss) private var dismiss
+    @State private var number = ""
+    @State private var messageBody = ""
+    @State private var state = ""
+    var body: some View {
+        NavigationStack { Form {
+            TextField("手机号", text: $number).keyboardType(.phonePad)
+            TextEditor(text: $messageBody).frame(minHeight: 140)
+            if !state.isEmpty { Text(state).foregroundStyle(state == "发送成功" ? .green : .secondary) }
+            Button("发送") {
+                state = "发送中…"
+                Task { let result = await store.sendSMS(number: number, body: messageBody); if case .success = result { state = "发送成功"; dismiss() } else { state = "发送失败" } }
+            }.disabled(!store.isConnected || number.isEmpty || messageBody.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+        }.navigationTitle("新短信").toolbar { ToolbarItem(placement: .cancellationAction) { Button("取消") { dismiss() } } } }
     }
 }

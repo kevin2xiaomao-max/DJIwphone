@@ -44,7 +44,7 @@ struct GatewayConfiguration {
     }
 
     func request(path: String, webSocket: Bool = false) throws -> URLRequest {
-        let paths = ["api/status", "api/calls", "api/messages"]
+        let paths = ["api/status", "api/calls", "api/messages", "api/sms/send"]
         guard (webSocket ? path == "ws" : paths.contains(path)) else { throw GatewayClientError.rejected }
         guard var parts = URLComponents(url: baseURL, resolvingAgainstBaseURL: false) else {
             throw GatewayClientError.invalidAddress
@@ -91,6 +91,16 @@ struct GatewayConfiguration {
         request.setValue(requestID.uuidString, forHTTPHeaderField: "X-Request-ID")
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.httpBody = try JSONSerialization.data(withJSONObject: body)
+        return request
+    }
+
+    func smsRequest(number: String, body: String, requestID: UUID) throws -> URLRequest {
+        guard Self.isValidDialNumber(number), !body.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { throw GatewayClientError.rejected }
+        var request = try self.request(path: "api/sms/send")
+        request.httpMethod = "POST"; request.timeoutInterval = 35
+        request.setValue(requestID.uuidString, forHTTPHeaderField: "X-Request-ID")
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = try JSONSerialization.data(withJSONObject: ["number": number, "body": body])
         return request
     }
 

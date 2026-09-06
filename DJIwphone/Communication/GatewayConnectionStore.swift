@@ -211,6 +211,12 @@ final class GatewayConnectionStore {
         }
     }
 
+    func sendSMS(number: String, body: String) async -> Result<Void, Error> {
+        guard let client else { return .failure(GatewayClientError.disconnected) }
+        do { try await client.sendSMS(number: number, body: body, requestID: UUID()); await refreshReadOnlyState(); return .success(()) }
+        catch { return .failure(error) }
+    }
+
     private func apply(_ event: GatewayEvent) {
         if let data = event.data, let callID = data.callId, let state = data.state {
             callCoordinator.apply(GatewayCallEvent(type: event.type, callID: callID,

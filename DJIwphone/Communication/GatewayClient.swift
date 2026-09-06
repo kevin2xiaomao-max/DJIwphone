@@ -7,6 +7,7 @@ protocol GatewayClient: AnyObject {
     func fetchMessages() async throws -> [GatewaySMSMessage]
     func fetchCalls() async throws -> [GatewayCall]
     func performCallAction(_ action: GatewayCallAction, callID: String?, number: String?, requestID: UUID) async throws -> GatewayCallActionResult
+    func sendSMS(number: String, body: String, requestID: UUID) async throws
     func connectEvents() async throws
     func disconnect()
     var onEvent: ((GatewayEvent) -> Void)? { get set }
@@ -65,6 +66,13 @@ final class URLSessionGatewayClient: GatewayClient {
             throw GatewayClientError.invalidResponse
         }
         return result
+    }
+    func sendSMS(number: String, body: String, requestID: UUID) async throws {
+        let (data, response) = try await session.data(for: configuration.smsRequest(number: number, body: body, requestID: requestID))
+        guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else { throw GatewayClientError.rejected }
+        struct Response: Decodable { let status: String }
+        let result = try decoder.decode(Response.self, from: data)
+        guard result.status == "sent" else { throw GatewayClientError.rejected }
     }
 
     // Requires HTTP data AND an authenticated WebSocket device.status frame.
