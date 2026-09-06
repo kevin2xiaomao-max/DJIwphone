@@ -15,7 +15,7 @@ jobs:
       - name: Install CocoaPods and resolve WebRTC
         run: gem install cocoapods --no-document && pod install --repo-update
       - name: Simulator XCTest
-        run: xcodebuild test -workspace DJIwphone.xcworkspace -scheme DJIwphone -destination 'platform=iOS Simulator,name=iPhone 16' -derivedDataPath build/Simulator CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO
+        run: xcodebuild test -workspace DJIwphone.xcworkspace -scheme DJIwphone -destination 'platform=iOS Simulator,OS=latest,name=iPhone 17 Pro' -derivedDataPath build/Simulator CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO
       - name: Device Release build and package
         shell: bash
         run: |
