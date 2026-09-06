@@ -12,17 +12,10 @@ settings:
     IPHONEOS_DEPLOYMENT_TARGET: "17.0"
     DEVELOPMENT_TEAM: ""
     CODE_SIGN_STYLE: Automatic
-packages:
-  WebRTC:
-    url: https://github.com/stasel/WebRTC.git
-    from: 151.0.1
 targets:
   DJIwphone:
     type: application
     platform: iOS
-    dependencies:
-      - package: WebRTC
-        product: WebRTC
     sources:
       - path: DJIwphone
     settings:
