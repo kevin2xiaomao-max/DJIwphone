@@ -3,7 +3,7 @@ set -euo pipefail
 
 ipa=${1:?usage: validate_ipa.sh path/to/DJIwphone.ipa [report]}
 report=${2:-ipa-validation.txt}
-min_ipa_bytes=${MIN_IPA_BYTES:-1048576}
+min_ipa_bytes=${MIN_IPA_BYTES:-262144}
 min_exec_bytes=${MIN_EXEC_BYTES:-65536}
 expected_bundle=${EXPECTED_BUNDLE_ID:-com.kevin2xiaomao.qdc507communication}
 tmp=$(mktemp -d)

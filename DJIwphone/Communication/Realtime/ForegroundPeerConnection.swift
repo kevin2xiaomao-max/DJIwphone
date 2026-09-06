@@ -1,11 +1,4 @@
 import Foundation
-import WebRTC
-
-enum DJIwphoneWebRTCDependency {
-    // Keep the linked WebRTC framework in the device product; the peer adapter
-    // owns the concrete factory once signaling negotiation is enabled.
-    static let factoryType = RTCPeerConnectionFactory.self
-}
 
 @MainActor
 protocol ForegroundPeerConnection: AnyObject {

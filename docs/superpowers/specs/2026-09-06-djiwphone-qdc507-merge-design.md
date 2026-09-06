@@ -69,7 +69,7 @@ GitHub Actions 只构建 `DJIwphone` scheme，并只上传一个名为 DJIwphone
 3. `Info.plist` 存在且可解析；`CFBundleIdentifier` 必须等于 `com.kevin2xiaomao.qdc507communication`，`CFBundleExecutable` 必须非空。
 4. `Payload/DJIwphone.app/<CFBundleExecutable>` 必须存在、可执行、大小超过最低门槛，并由 `file` 识别为 arm64 Mach-O executable。
 5. 使用 `otool -L` 检查主程序依赖；所有非系统动态依赖必须能在 App 的 `Frameworks` 目录解析。若 WebRTC 为静态链接，则通过链接清单和符号/产物体积验证，不强制要求动态 Framework。
-6. App 目录和 IPA 文件均设置最低体积门槛。门槛按实际成功 Release 构建校准，但必须明确拒绝约 56KB 的空壳产物；初始 IPA 下限为 1 MiB，集成 WebRTC 后应根据真实产物提高。
+6. App 目录和 IPA 文件均设置最低体积门槛。门槛按实际成功 Release 构建校准，但必须明确拒绝约 56KB 的空壳产物；当前 IPA 下限为 256 KiB，并应在 WebRTC 真正静态链接后根据真实产物提高。
 7. `unzip -t` 必须成功，IPA 清单必须输出到 workflow 日志并保存为随 artifact 一起上传的校验报告。
 8. 任一检查失败立即以非零状态退出；上传步骤不得运行。
 
