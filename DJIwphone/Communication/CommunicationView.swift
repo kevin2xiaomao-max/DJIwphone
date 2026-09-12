@@ -91,7 +91,7 @@ struct CommunicationView: View {
         Form {
             Section("设备") { LabeledContent("设备", value: "QDC507"); LabeledContent("连接状态", value: store.isConnected ? "已连接" : "未连接") }
             Section("Gateway") { Button("Gateway 设置") { showsGatewaySettings = true }; LabeledContent("状态", value: store.isConnected ? "在线" : "离线") }
-            Section("关于") { LabeledContent("版本", value: "0.2.0"); Text("QDC507 通信").foregroundStyle(.secondary) }
+            Section("关于") { LabeledContent("版本", value: Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "未知"); Text("QDC507 通信").foregroundStyle(.secondary) }
         }
         .navigationTitle("设置")
         .sheet(isPresented: $showsGatewaySettings) { NavigationStack { GatewaySettingsView(settings: settings) }.tint(accent) }
