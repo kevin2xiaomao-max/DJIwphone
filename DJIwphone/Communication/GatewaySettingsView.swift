@@ -10,6 +10,7 @@ struct GatewaySettingsView: View {
     @State private var feedback: String?
     @State private var isTesting = false
     @State private var testTask: Task<Void, Never>?
+    @StateObject private var webRTCClient = ForegroundWebRTCClient()
 
     var body: some View {
         Form {
@@ -65,6 +66,21 @@ struct GatewaySettingsView: View {
                 Text("尚未提供可靠的未接来电和未读短信统计，因此不显示数量。")
             }
 
+            Section("WebRTC 音频测试") {
+                Button("开始测试", action: startWebRTCTest)
+                    .disabled(isTesting || webRTCClient.phase == .connecting || webRTCClient.phase == .connected)
+                Button("停止测试", action: webRTCClient.stop)
+                    .disabled(webRTCClient.phase == .stopped)
+                LabeledContent("Peer state", value: webRTCClient.peerState)
+                LabeledContent("ICE state", value: webRTCClient.iceState)
+                LabeledContent("远端音频", value: webRTCClient.remoteAudioReceived ? "已收到" : "未收到")
+                if let error = webRTCClient.lastError {
+                    Text(error).foregroundStyle(.red).accessibilityLabel(error)
+                }
+            } footer: {
+                Text("仅用于前台双向测试音频，不连接 QDC507 PCM，不影响正式通话。")
+            }
+
             Section("安全提示") {
                 Text("当前默认 HTTP 不加密传输 Token 与数据，只能在可信的同一 Wi-Fi 使用，不能用于公网。Keychain 仅保护本机存储。")
                     .foregroundStyle(.secondary)
@@ -77,7 +93,10 @@ struct GatewaySettingsView: View {
         .onAppear { address = settings.savedAddress }
         .onChange(of: address) { _, _ in clearTestSuccess() }
         .onChange(of: token) { _, _ in clearTestSuccess() }
-        .onDisappear(perform: cancelTest)
+        .onDisappear {
+            cancelTest()
+            webRTCClient.stop()
+        }
     }
 
     private func save() {
@@ -118,6 +137,17 @@ struct GatewaySettingsView: View {
         testTask?.cancel()
         testTask = nil
         token = ""
+    }
+
+    private func startWebRTCTest() {
+        Task { @MainActor in
+            do {
+                let configuration = try settings.configuration(address: address, token: token)
+                await webRTCClient.start(configuration: configuration)
+            } catch {
+                feedback = GatewayClientError.safeMessage(for: error)
+            }
+        }
     }
 
     private func finish() {

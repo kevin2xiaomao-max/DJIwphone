@@ -44,7 +44,7 @@ struct GatewayConfiguration {
     }
 
     func request(path: String, webSocket: Bool = false) throws -> URLRequest {
-        let paths = ["api/status", "api/calls", "api/messages", "api/sms/send"]
+        let paths = ["api/status", "api/calls", "api/messages", "api/sms/send", "api/webrtc/offer", "api/webrtc/status"]
         guard (webSocket ? path == "ws" : paths.contains(path)) else { throw GatewayClientError.rejected }
         guard var parts = URLComponents(url: baseURL, resolvingAgainstBaseURL: false) else {
             throw GatewayClientError.invalidAddress
