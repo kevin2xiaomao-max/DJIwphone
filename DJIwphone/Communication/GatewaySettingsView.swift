@@ -72,7 +72,9 @@ struct GatewaySettingsView: View {
                 Button("停止测试", action: webRTCClient.stop)
                     .disabled(webRTCClient.phase == .stopped)
                 LabeledContent("Peer state", value: webRTCClient.peerState)
+                LabeledContent("当前阶段", value: webRTCClient.phase.rawValue)
                 LabeledContent("ICE state", value: webRTCClient.iceState)
+                LabeledContent("本地 ICE candidates", value: "\(webRTCClient.localCandidateCount)")
                 LabeledContent("远端音频", value: webRTCClient.remoteAudioReceived ? "已收到" : "未收到")
                 if let error = webRTCClient.lastError {
                     Text(error).foregroundStyle(.red).accessibilityLabel(error)
