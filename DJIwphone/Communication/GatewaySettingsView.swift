@@ -66,7 +66,7 @@ struct GatewaySettingsView: View {
                 Text("尚未提供可靠的未接来电和未读短信统计，因此不显示数量。")
             }
 
-            Section("WebRTC 音频测试") {
+            Section {
                 Button("开始测试", action: startWebRTCTest)
                     .disabled(isTesting || webRTCClient.phase == .connecting || webRTCClient.phase == .connected)
                 Button("停止测试", action: webRTCClient.stop)
@@ -77,6 +77,8 @@ struct GatewaySettingsView: View {
                 if let error = webRTCClient.lastError {
                     Text(error).foregroundStyle(.red).accessibilityLabel(error)
                 }
+            } header: {
+                Text("WebRTC 音频测试")
             } footer: {
                 Text("仅用于前台双向测试音频，不连接 QDC507 PCM，不影响正式通话。")
             }
