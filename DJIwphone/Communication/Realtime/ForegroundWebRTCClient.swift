@@ -105,7 +105,7 @@ final class ForegroundWebRTCClient: NSObject, ObservableObject {
     }
 
     private func makeOffer(peer: RTCPeerConnection, constraints: RTCMediaConstraints) async throws -> RTCSessionDescription {
-        try await withCheckedThrowingContinuation { continuation in
+        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
             peer.offer(for: constraints) { description, error in
                 if let error { continuation.resume(throwing: error) }
                 else if let description { continuation.resume(returning: description) }
@@ -115,7 +115,7 @@ final class ForegroundWebRTCClient: NSObject, ObservableObject {
     }
 
     private func setLocalDescription(peer: RTCPeerConnection, description: RTCSessionDescription) async throws {
-        try await withCheckedThrowingContinuation { continuation in
+        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
             peer.setLocalDescription(description) { error in
                 if let error { continuation.resume(throwing: error) }
                 else { continuation.resume() }
