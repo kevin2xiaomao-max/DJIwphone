@@ -23,6 +23,7 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: com.kevin2xiaomao.qdc507communication
         MARKETING_VERSION: "0.3.0"
         CURRENT_PROJECT_VERSION: "1"
+        FRAMEWORK_SEARCH_PATHS: "$(inherited) $(PODS_XCFRAMEWORKS_BUILD_DIR)/WebRTC-lib $(BUILD_DIR)/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/WebRTC-lib"
         GENERATE_INFOPLIST_FILE: YES
         INFOPLIST_KEY_CFBundleDisplayName: DJIwphone
         INFOPLIST_KEY_NSMicrophoneUsageDescription: QDC507 通话音频需要使用麦克风
