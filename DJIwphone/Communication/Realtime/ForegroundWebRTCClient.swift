@@ -180,7 +180,11 @@ extension GatewayConfiguration {
         var request = try self.request(path: "api/webrtc/offer")
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.httpBody = try JSONSerialization.data(withJSONObject: ["type": "offer", "sdp": sdp])
+        request.httpBody = try JSONSerialization.data(withJSONObject: [
+            "type": "offer",
+            "sdp": sdp,
+            "media_mode": "qdc-ipc"
+        ])
         return request
     }
 }
